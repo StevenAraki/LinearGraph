@@ -1,0 +1,110 @@
+\RequirePackage{ifthen}
+\RequirePackage{tikz}
+\usetikzlibrary{decorations.markings, patterns, calc, fit}
+
+\newcounter{gSources}
+\newcounter{gGrounds}
+\newcounter{gNormal}
+\newboolean{gNormal}
+\setboolean{gNormal}{false}
+
+\newcommand{\gMaxNormal}{1000}
+
+\newcommand{\gMaxNormals}[1]{
+	\renewcommand{\gMaxNormal}{#1}
+}
+
+\newenvironment{gNormal}{
+	\setboolean{gNormal}{true}
+}{
+	\setboolean{gNormal}{false}
+}
+
+\newcommand{\gSource}[5]{
+	\path [=>, thick, line cap=round, postaction={decorate},
+		decoration={markings, mark=at position 0.5 with {
+			\node [circle, minimum width=20pt+\pgflinewidth] (m\arabic{gSources}) {};
+		}}] (#1) to [bend #3] node [midway, #4] {#5} (#2);
+	\begin{scope}[even odd rule]
+		\clip
+			(current bounding box.north west) rectangle (current bounding box.south east)
+			(m\arabic{gSources}) circle (10pt-0.5\pgflinewidth)
+			(m\arabic{gSources}) circle (10pt-1.5\pgflinewidth);
+		\draw [=>, thick, line cap=round, postaction={decorate},
+			decoration={markings,mark=at position 0.5 with {
+				\draw circle (10pt);
+			}},
+			decoration={markings,mark=at position 0.55 with {
+				\arrow{>};
+			}}] (#1) to [bend #3] (#2);
+	\end{scope}
+	\ifthenelse{\boolean{gNormal}}{
+		\ifnum\value{gNormal}<\gMaxNormal%
+			\draw[-, yellow, line width=0.3cm, opacity=0.65, line cap=round] (#1.center) to [bend #3] (#2.center);
+		\fi
+		\stepcounter{gNormal}
+	}{}
+	\stepcounter{gSources}
+}
+
+\newcommand{\gBranchAP}[7]{
+	\draw [=>, thick, line cap=round, postaction={decorate},
+		decoration={markings, mark=at position #7 with {
+			\arrow{>};
+			\coordinate (#1);
+		}}] (#2) to [bend #4] node [pos=#7, #5] {#6} (#3);
+	\ifthenelse{\boolean{gNormal}}{
+		\ifnum\value{gNormal}<\gMaxNormal%
+			\draw[-, yellow, line width=0.3cm, opacity=0.65, line cap=round] (#2.center) to [bend #4] (#3.center);
+		\fi
+		\stepcounter{gNormal}
+	}{}
+}
+
+\newcommand{\gBranch}[6][none]{
+	\gBranchAP{#1}{#2}{#3}{#4}{#5}{#6}{0.5}
+}
+
+\newcommand{\gNode}[2]{
+	\node[circle,draw=black,fill=lightgray,thick,inner sep=0pt,minimum size=1.5mm] (#2) at (#1) {};
+}
+
+\newcommand{\gGround}[3][1cm]{
+	\node [fill, pattern=north east lines, draw=none, minimum width=#1, minimum height=0.2cm, yshift=-0.1cm] (h\arabic{gGrounds}) at (#2) {};
+	\draw [thick] (h\arabic{gGrounds}.north east) -- (h\arabic{gGrounds}.north west);
+	\coordinate (#3) at (h\arabic{gGrounds}.north);
+	\stepcounter{gGrounds}
+}
+
+\newcommand{\gCapacitor}[5]{
+	\draw
+		let
+			\p1=(#1), \p2=(#2), \n1={0.52*veclen(\y2-\y1, \x2-\x1)}
+		in [=>, thick, line cap=round, postaction={decorate},
+		decoration={markings, mark=at position 0.5 with {
+			\arrow{>};
+		}},
+		dash pattern=on \n1 off 0.1cm on 0.1cm off 0.1cm on 0.1cm off 0.1cm on 0.1cm off 0.1cm on 0.1cm off 0.1cm on 0.1cm off 0.1cm on 0.1cm off 0.1cm on 0.1cm off 0.1cm on 0.1cm  off 0.1cm on 0.1cm off 0.1cm on 0.1cm off 0.1cm on 0.1cm off 0.1cm on 0.1cm  off 0.1cm on 0.1cm]
+		(#1) to [bend #3] node [midway, #4] {#5} (#2);
+	\ifthenelse{\boolean{gNormal}}{
+		\ifnum\value{gNormal}<\gMaxNormal%
+			\draw[-, yellow, line width=0.3cm, opacity=0.65, line cap=round] (#1.center) to [bend #3] (#2.center);
+		\fi
+		\stepcounter{gNormal}
+	}{}
+}
+
+\newcommand{\gTF}[2]{
+	\node [fit=(#1)(#2), draw, thick, minimum height=4mm, rounded corners=2.2mm, inner sep=2mm] {};
+}
+
+\newcommand{\gGY}[2]{
+	\draw [thick, rounded corners=2.2mm] ($(#1)+(0,3.2mm)$) -- ($(#2)-(0,3.2mm)$) -- ($(#2)+(3.2mm,0)$) -- ($(#2)+(0,3.2mm)$) -- ($(#1)-(0,3.2mm)$) -- ($(#1)-(3.2mm,0)$) -- cycle;
+}
+
+\newenvironment{LinearGraph}{
+	\setcounter{gNormal}{0}
+	\begin{tikzpicture}
+}{
+	\end{tikzpicture}
+}
