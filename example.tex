@@ -1,0 +1,25 @@
+\documentclass{standalone}
+
+\usepackage{LinearGraph}
+
+\begin{document}
+\begin{LinearGraph}
+\gGround{0,0}{n1}
+\gNode{0,2cm}{n2}
+\gNode{0,4cm}{n3}
+\gBranch[tf1]{n3}{n2}{left=52}{right}{1}
+\gBranch{n3}{n2}{right}{left}{$B$}
+\gSource{n1}{n2}{right}{right=2.5mm}{$F(t)$}
+\gCapacitor{n2}{n1}{right}{left}{$m$}
+\gGround{1.75cm,2cm}{n4}
+\gNode{1.75cm,4cm}{n5}
+\gBranch[tf2]{n5}{n4}{right=52}{left, yshift=0.75pt}{2}
+\gBranch[tf3]{n5}{n4}{left=50}{right=-1pt}{3}
+\gTF{tf1}{tf2}
+\gGround{3.5cm,2cm}{n6}
+\gNode{3.5cm,4cm}{n7}
+\gBranch[tf4]{n7}{n6}{right=50}{left=-1pt}{4}
+\gBranch{n6}{n7}{right}{right}{$K$}
+\gGY{tf3}{tf4}
+\end{LinearGraph}
+\end{document}
